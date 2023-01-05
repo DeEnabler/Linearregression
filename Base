@@ -1,0 +1,57 @@
+from alpha_vantage.timeseries import TimeSeries
+import requests
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+from statistics import mean
+
+#ts = TimeSeries(key='P4T7Q627KLSF6BPA',output_format='pandas', indexing_type='integer')
+
+# Get json object with the intraday data and another with  the call's metadata
+#data, meta_data = ts.get_intraday('GOOGL')
+
+#close = data['4. close']
+
+
+url = 'https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=IBM&apikey=P4T7Q627KLSF6BPA'
+r = requests.get(url)
+data = r.json()
+
+# Parse the JSON response into a pandas DataFrame
+df = pd.DataFrame.from_dict(data['Weekly Time Series'], orient='index')
+
+# Extract the close prices from the DataFrame
+close_prices = df['4. close'].astype(float)
+dates = close_prices.index
+prices = close_prices.values
+dates = pd.to_datetime(close_prices.index)
+
+# Convert the datetime objects to numerical values
+dates_n = pd.to_numeric(dates).values.reshape(-1, 1)
+
+# Load the data into a NumPy array
+X = np.array(dates_n).reshape(-1, 1)
+y = np.array(prices)
+# Create the linear regression model
+model = LinearRegression()
+
+# Fit the model to the data
+model.fit(X, y)
+
+# Get the model's predictions for the X data
+predictions = model.predict(X)
+
+# Plot the data
+plt.plot(X, y, 'bo', label='Actual data')
+
+# Plot the predictions
+plt.plot(X, predictions, 'r', label='Predicted data')
+
+# Add a legend
+plt.legend()
+
+# Show the plot
+plt.show()
