@@ -44,6 +44,28 @@ model.fit(X, y)
 # Get the model's predictions for the X data
 predictions = model.predict(X)
 
+# Calculate the mean and standard deviation of the residuals
+residuals = y - predictions
+mean_residual = np.mean(residuals)
+std_residual = np.std(residuals)
+threshold = 3
+# Identify the fair value of the target based on the mean and standard deviation of the residuals
+fair_value = mean_residual + std_residual
+
+# Check if the target is trading significantly above or below its fair value
+if y.any() > (fair_value + threshold):
+    # Enter a short trade
+    trade_direction = 'short'
+elif y.any()  < (fair_value - threshold):
+    # Enter a long trade
+    trade_direction = 'long'
+else:
+    # Do not enter a trade
+    trade_direction = 'none'
+
+# Print the trade direction
+print(trade_direction)
+
 # Plot the data
 plt.plot(X, y, 'bo', label='Actual data')
 
